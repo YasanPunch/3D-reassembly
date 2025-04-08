@@ -1,3 +1,5 @@
+# Default
+
 # Prerequisites
 *.d
 
@@ -30,3 +32,8 @@
 *.exe
 *.out
 *.app
+
+# Custom
+
+# Buid folder
+build
