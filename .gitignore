@@ -35,5 +35,5 @@
 
 # Custom
 
-# Buid folder
+.cache
 build
