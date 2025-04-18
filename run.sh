@@ -9,10 +9,10 @@ if [ ! -f "$BUILD_DIR/App" ]; then
   exit 1
 fi
 
-# Run the executable
+# Run the executable with command-line arguments
 echo "Running the executable..."
 cd "$BUILD_DIR" || exit
-./App
+./App "$@" # Pass all arguments to App
 
 # Check if the executable ran successfully
 if [ $? -eq 0 ]; then
