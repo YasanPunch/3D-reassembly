@@ -223,6 +223,7 @@ class App:
 
     def load(self, path):
         self._scene.scene.clear_geometry()
+        self.model = None
 
         geometry = None
         geometry_type = o3d.io.read_file_geometry_type(path)
@@ -251,11 +252,13 @@ class App:
                 if mesh is not None:
                     # Triangle model
                     self._scene.scene.add_model("__model__", mesh)
+                    self.model = mesh
                 else:
                     # Point cloud
                     self._scene.scene.add_geometry(
                         "__model__", geometry, self.settings.material
                     )
+                    self.model = mesh
                 bounds = self._scene.scene.bounding_box
                 self._scene.setup_camera(60, bounds, bounds.get_center())
             except Exception as e:
@@ -282,6 +285,12 @@ def main():
 
     if len(sys.argv) > 1:
         path = sys.argv[1]
+        if os.path.exists(path):
+            w.load(path)
+        else:
+            w.window.show_message_box("Error", "Could not open file '" + path + "'")
+    else:
+        path = "/home/pundima/dev/reassembly/data/cloudcompare/lid/1/top1.obj"
         if os.path.exists(path):
             w.load(path)
         else:
