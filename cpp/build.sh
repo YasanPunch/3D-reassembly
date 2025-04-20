@@ -19,7 +19,7 @@ cd "$BUILD_DIR" || exit
 
 # Run CMake to configure the project (passing Open3D_ROOT if necessary)
 echo "Running CMake configuration..."
-cmake -DOpen3D_ROOT="$OPEN3D_ROOT" -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ../cpp
+cmake -DOpen3D_ROOT="$OPEN3D_ROOT" -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ..
 
 # Build the project using make with 12 parallel jobs
 echo "Building the project using make..."
