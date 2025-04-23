@@ -1,8 +1,14 @@
+# ----------------------------------------------------------------------------
+# -                        Open3D: www.open3d.org                            -
+# ----------------------------------------------------------------------------
+# Copyright (c) 2018-2024 www.open3d.org
+# SPDX-License-Identifier: MIT
+# ----------------------------------------------------------------------------
+
+import numpy as np
 import open3d as o3d
 import threading
 import time
-
-from app import App
 
 CLOUD_NAME = "points"
 
@@ -23,11 +29,12 @@ class MultiWinApp:
         app = o3d.visualization.gui.Application.instance
         app.initialize()
 
-        self.main_vis = App(1024, 768)
-        # self.main_vis.set_on_close(self.on_main_window_closing)
+        self.main_vis = o3d.visualization.O3DVisualizer("Open3D - Multi-Window Demo")
+        self.main_vis.add_action("Take snapshot in new window", self.on_snapshot)
+        self.main_vis.set_on_close(self.on_main_window_closing)
 
-        app.add_window(self.main_vis.window)
-        # self.snapshot_pos = (self.main_vis.os_frame.x, self.main_vis.os_frame.y)
+        app.add_window(self.main_vis)
+        self.snapshot_pos = (self.main_vis.os_frame.x, self.main_vis.os_frame.y)
 
         threading.Thread(target=self.update_thread).start()
 
@@ -60,7 +67,6 @@ class MultiWinApp:
         return True  # False would cancel the close
 
     def update_thread(self):
-        return
         # This is NOT the UI thread, need to call post_to_main_thread() to update
         # the scene or any part of the UI.
         pcd_data = o3d.data.DemoICPPointClouds()
