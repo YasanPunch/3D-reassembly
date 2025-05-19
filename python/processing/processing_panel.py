@@ -1,6 +1,8 @@
 import open3d as o3d
 import open3d.visualization.gui as gui  # type: ignore
 
+from processing.segmentation import Segmentation
+
 
 class ProcessingPanel:
     def __init__(self, app):
@@ -41,9 +43,9 @@ class ProcessingPanel:
         m = o3d.io.read_triangle_mesh(self.app.mesh_path)
         m.compute_triangle_normals()
         print(m.triangle_normals)
-        o3d.visualization.draw_geometries([m])
+        o3d.visualization.draw_geometries([m])  # type: ignore
 
     def _on_segment_mesh(self):
         m = o3d.io.read_triangle_mesh(self.app.mesh_path)
-        m.compute_triangle_normals()
-        print(m.triangle_normals)
+        s = Segmentation()
+        s.region_growing_mesh(m)

@@ -277,11 +277,7 @@ class App:
         self._scene.scene.scene.render_to_image(on_image)
 
     def run(self):
-        path = "/home/pundima/dev/reassembly/data/cloudcompare/lid/1/top1.obj"
-        if os.path.exists(path):
-            self.load(path)
-        else:
-            self.window.show_message_box("Error", "Could not open file '" + path + "'")
+        pass
 
 
 def main():
@@ -298,7 +294,7 @@ def main():
         else:
             w.window.show_message_box("Error", "Could not open file '" + path + "'")
     else:
-        path = "/home/pundima/dev/reassembly/data/cloudcompare/lid/1/top1.obj"
+        path = "/home/pundima/dev/reassembly/data/Tombstone/Model_Tombstone1/Tombstone1_low.obj"
         if os.path.exists(path):
             w.load(path)
         else:
