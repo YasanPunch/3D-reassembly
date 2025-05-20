@@ -30,6 +30,7 @@ class App:
             "Reassembly", width, height
         )
         w = self.window  # to make the code more concise
+        self._panels_layout = gui.ScrollableVert()
 
         self._settings_panel = SettingsPanel(self)
         self._processing_panel = ProcessingPanel(self)
@@ -48,8 +49,12 @@ class App:
         # done the window will layout the grandchildren.
         w.set_on_layout(self._on_layout)
         w.add_child(self._scene)
-        w.add_child(self._settings_panel._settings_panel)
-        w.add_child(self._processing_panel._processing_panel)
+        w.add_child(self._panels_layout)
+
+        p = self._panels_layout  # to make the code more concise
+
+        p.add_child(self._settings_panel._settings_panel)
+        p.add_child(self._processing_panel._processing_panel)
 
         # ---- Menu ----
         # The menu is global (because the macOS menu is global), so only create
@@ -70,7 +75,7 @@ class App:
 
             menu = gui.Menu()
             menu.add_menu("File", file_menu)
-            menu.add_menu("Settings", settings_menu)
+            menu.add_menu("Panel Settings", settings_menu)
             menu.add_menu("Help", help_menu)
             gui.Application.instance.menubar = menu
 
@@ -96,8 +101,12 @@ class App:
         # child correctly. After the callback is done the window will layout
         # the grandchildren.
         r = self.window.content_rect
-        self._scene.frame = r
         width = 17 * layout_context.theme.font_size
+
+        self._scene.frame = gui.Rect(r.x, r.y, r.get_right() - width, r.height)
+        self._panels_layout.frame = gui.Rect(
+            r.get_right() - width, r.y, width, r.height
+        )
 
         height = min(
             r.height,
@@ -116,7 +125,7 @@ class App:
             ).height,
         )
         self._processing_panel._processing_panel.frame = gui.Rect(
-            r.get_right() - width, r.get_bottom() - height, width, height
+            r.get_right() - 2 * width, r.get_bottom() - height, width, height
         )
 
     def _on_menu_open(self):
@@ -224,7 +233,7 @@ class App:
         self.window.close_dialog()
 
     def load(self, path):
-        self._scene.scene.clear_geometry()
+        # self._scene.scene.clear_geometry()
         self.mesh_path = None
 
         geometry = None

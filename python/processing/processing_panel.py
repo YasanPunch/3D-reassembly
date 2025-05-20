@@ -10,13 +10,14 @@ class ProcessingPanel:
 
         w = app.window  # to make the code more concise
         em = w.theme.font_size
+        separation_height = int(round(0.5 * em))
 
         self._processing_panel = gui.Vert(
             0, gui.Margins(0.25 * em, 0.25 * em, 0.25 * em, 0.25 * em)
         )
 
         common_ctrls = gui.CollapsableVert(
-            "Common controls", 0.25 * em, gui.Margins(em, em, 0, 0)
+            "Common controls", 0.25 * em, gui.Margins(em, 0, 0, 0)
         )
 
         self._process_button = gui.Button("Process")
@@ -26,9 +27,10 @@ class ProcessingPanel:
 
         common_ctrls.add_child(self._process_button)
         self._processing_panel.add_child(common_ctrls)
+        self._processing_panel.add_fixed(separation_height)
 
         mesh_ctrls = gui.CollapsableVert(
-            "Mesh controls", 0.25 * em, gui.Margins(em, em, 0, 0)
+            "Mesh controls", 0.25 * em, gui.Margins(em, 0, 0, 0)
         )
 
         self._segment_mesh_button = gui.Button("Segment Mesh")
@@ -38,6 +40,7 @@ class ProcessingPanel:
 
         mesh_ctrls.add_child(self._segment_mesh_button)
         self._processing_panel.add_child(mesh_ctrls)
+        self._processing_panel.add_fixed(separation_height)
 
     def _on_process(self):
         m = o3d.io.read_triangle_mesh(self.app.mesh_path)

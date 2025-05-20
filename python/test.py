@@ -3,7 +3,7 @@ import numpy as np
 import random
 
 
-def voxel_downsample(point_cloud, voxel_size=10.0):
+def voxel_downsample(point_cloud, voxel_size=3.0):
     """
     Voxel downsamples a point cloud.
 
@@ -36,16 +36,16 @@ def region_growing(
     """
 
     # 1. Estimate normals for the point cloud.  Important for region growing.
-    print("Estimating normals...")
-    point_cloud.estimate_normals(
-        search_param=o3d.geometry.KDTreeSearchParamHybrid(
-            radius=0.1, max_nn=k_neighbors
-        )
-    )
+    # print("Estimating normals...")
+    # point_cloud.estimate_normals(
+    #     search_param=o3d.geometry.KDTreeSearchParamHybrid(
+    #         radius=0.1, max_nn=k_neighbors
+    #     )
+    # )
     # point_cloud.orient_normals_to_align_with_directions()  # Ensure normals point in consistent direction
-    o3d.visualization.draw_geometries(
-        [point_cloud]
-    )  # Visualize the colored point cloud
+    # o3d.visualization.draw_geometries(
+    #     [point_cloud]
+    # )
 
     points = np.asarray(point_cloud.points)
     normals = np.asarray(point_cloud.normals)
@@ -80,8 +80,11 @@ def region_growing(
 
             # Find neighbors of the current point.
             [k, neighbor_indices, distances] = pcd_tree.search_radius_vector_3d(
-                seed_point, radius=0.1
+                seed_point, radius=20
             )
+            # print(
+            #     f"neighbor_indices {len(neighbor_indices)} for seed_point {seed_point}"
+            # )
 
             # Check each neighbor to see if it should be added to the region.
             for neighbor_index in neighbor_indices:
@@ -89,7 +92,7 @@ def region_growing(
                     neighbor_normal = normals[neighbor_index]
                     # Cosine similarity between normals.
                     similarity = np.dot(seed_normal, neighbor_normal)
-                    print(f"{similarity}, {seed_normal}, {neighbor_normal}")
+                    # print(f"{similarity}, {seed_normal}, {neighbor_normal}")
                     if similarity > normal_threshold:
                         visited[neighbor_index] = True
                         unvisited.discard(neighbor_index)  # Remove from unvisited set
@@ -144,7 +147,7 @@ if __name__ == "__main__":
     print("Loading point cloud...")
     # point_cloud = o3d.io.read_point_cloud("path/to/your/point_cloud.ply")
     point_cloud = o3d.io.read_point_cloud(
-        "/home/pundima/dev/reassembly/data/FYP Reassembly/PC/Brick/top/pc.apj/top.ply"
+        "/home/pundima/dev/reassembly/data/cloudcompare/tombstone/1/low.ply"
     )
 
     if point_cloud.is_empty():
