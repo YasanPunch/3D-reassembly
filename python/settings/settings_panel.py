@@ -205,72 +205,94 @@ class SettingsPanel:
         self._settings_panel.add_child(material_settings)
         # ----
 
-    def _apply_settings(self):
-        bg_color = [
-            self.settings.bg_color.red,
-            self.settings.bg_color.green,
-            self.settings.bg_color.blue,
-            self.settings.bg_color.alpha,
-        ]
-        self.app._scene.scene.set_background(bg_color)
-        self.app._scene.scene.show_skybox(self.settings.show_skybox)
-        self.app._scene.scene.show_axes(self.settings.show_axes)
-        if self.settings.new_ibl_name is not None:
-            self.app._scene.scene.scene.set_indirect_light(self.settings.new_ibl_name)
-            # Clear new_ibl_name, so we don't keep reloading this image every
-            # time the settings are applied.
-            self.settings.new_ibl_name = None
-        self.app._scene.scene.scene.enable_indirect_light(self.settings.use_ibl)
-        self.app._scene.scene.scene.set_indirect_light_intensity(
-            self.settings.ibl_intensity
-        )
-        sun_color = [
-            self.settings.sun_color.red,
-            self.settings.sun_color.green,
-            self.settings.sun_color.blue,
-        ]
-        self.app._scene.scene.scene.set_sun_light(
-            self.settings.sun_dir, sun_color, self.settings.sun_intensity
-        )
-        self.app._scene.scene.scene.enable_sun_light(self.settings.use_sun)
+    def _apply_settings(self, indices=None):
+        if indices is None:
+            indices = self.app._scenes_selected
 
-        if self.settings.apply_material:
-            self.app._scene.scene.update_material(self.settings.material)
-            self.settings.apply_material = False
+        for i in indices:
+            s = self.app._scenes[i].scene
 
-        self._bg_color.color_value = self.settings.bg_color
-        self._show_skybox.checked = self.settings.show_skybox
-        self._show_axes.checked = self.settings.show_axes
-        self._use_ibl.checked = self.settings.use_ibl
-        self._use_sun.checked = self.settings.use_sun
-        self._ibl_intensity.int_value = self.settings.ibl_intensity
-        self._sun_intensity.int_value = self.settings.sun_intensity
-        self._sun_dir.vector_value = self.settings.sun_dir
-        self._sun_color.color_value = self.settings.sun_color
-        self._material_prefab.enabled = self.settings.material.shader == Settings.LIT
-        c = gui.Color(
-            self.settings.material.base_color[0],
-            self.settings.material.base_color[1],
-            self.settings.material.base_color[2],
-            self.settings.material.base_color[3],
-        )
-        self._material_color.color_value = c
-        self._point_size.double_value = self.settings.material.point_size
+            bg_color = [
+                self.settings.bg_color.red,
+                self.settings.bg_color.green,
+                self.settings.bg_color.blue,
+                self.settings.bg_color.alpha,
+            ]
+            s.set_background(bg_color)
+            s.set_background(bg_color)
+            s.show_skybox(self.settings.show_skybox)
+            s.show_axes(self.settings.show_axes)
+            if self.settings.new_ibl_name is not None:
+                s.scene.set_indirect_light(self.settings.new_ibl_name)
+                # Clear new_ibl_name, so we don't keep reloading this image every
+                # time the settings are applied.
+                self.settings.new_ibl_name = None
+            s.scene.enable_indirect_light(self.settings.use_ibl)
+            s.scene.set_indirect_light_intensity(self.settings.ibl_intensity)
+            sun_color = [
+                self.settings.sun_color.red,
+                self.settings.sun_color.green,
+                self.settings.sun_color.blue,
+            ]
+            s.scene.set_sun_light(
+                self.settings.sun_dir, sun_color, self.settings.sun_intensity
+            )
+            s.scene.enable_sun_light(self.settings.use_sun)
+
+            if self.settings.apply_material:
+                s.update_material(self.settings.material)
+                self.settings.apply_material = False
+
+            self._bg_color.color_value = self.settings.bg_color
+            self._show_skybox.checked = self.settings.show_skybox
+            self._show_axes.checked = self.settings.show_axes
+            self._use_ibl.checked = self.settings.use_ibl
+            self._use_sun.checked = self.settings.use_sun
+            self._ibl_intensity.int_value = self.settings.ibl_intensity
+            self._sun_intensity.int_value = self.settings.sun_intensity
+            self._sun_dir.vector_value = self.settings.sun_dir
+            self._sun_color.color_value = self.settings.sun_color
+            self._material_prefab.enabled = (
+                self.settings.material.shader == Settings.LIT
+            )
+            c = gui.Color(
+                self.settings.material.base_color[0],
+                self.settings.material.base_color[1],
+                self.settings.material.base_color[2],
+                self.settings.material.base_color[3],
+            )
+            self._material_color.color_value = c
+            self._point_size.double_value = self.settings.material.point_size
 
     def _set_mouse_mode_rotate(self):
-        self.app._scene.set_view_controls(gui.SceneWidget.Controls.ROTATE_CAMERA)
+        indices = self.app._scenes_selected
+        for i in indices:
+            s = self.app._scenes[i]
+            s.set_view_controls(gui.SceneWidget.Controls.ROTATE_CAMERA)
 
     def _set_mouse_mode_fly(self):
-        self.app._scene.set_view_controls(gui.SceneWidget.Controls.FLY)
+        indices = self.app._scenes_selected
+        for i in indices:
+            s = self.app._scenes[i]
+            s.set_view_controls(gui.SceneWidget.Controls.FLY)
 
     def _set_mouse_mode_sun(self):
-        self.app._scene.set_view_controls(gui.SceneWidget.Controls.ROTATE_SUN)
+        indices = self.app._scenes_selected
+        for i in indices:
+            s = self.app._scenes[i]
+            s.set_view_controls(gui.SceneWidget.Controls.ROTATE_SUN)
 
     def _set_mouse_mode_ibl(self):
-        self.app._scene.set_view_controls(gui.SceneWidget.Controls.ROTATE_IBL)
+        indices = self.app._scenes_selected
+        for i in indices:
+            s = self.app._scenes[i]
+            s.set_view_controls(gui.SceneWidget.Controls.ROTATE_IBL)
 
     def _set_mouse_mode_model(self):
-        self.app._scene.set_view_controls(gui.SceneWidget.Controls.ROTATE_MODEL)
+        indices = self.app._scenes_selected
+        for i in indices:
+            s = self.app._scenes[i]
+            s.set_view_controls(gui.SceneWidget.Controls.ROTATE_MODEL)
 
     def _on_bg_color(self, new_color):
         self.settings.bg_color = new_color
