@@ -1,4 +1,5 @@
 import open3d.visualization.gui as gui  # type: ignore
+import os
 
 
 class ModelsPanel:
@@ -28,7 +29,12 @@ class ModelsPanel:
         def handle_click(checked):
             self._on_cb(i, checked)
 
-        cb = gui.Checkbox(f"{i}")
+        text = os.path.basename(self.app._scenes_paths[i])
+
+        if i == 0:
+            text = "Processed"
+
+        cb = gui.Checkbox(text)
         cb.checked = True
         cb.set_on_checked(handle_click)
         self.loaded_models.add_child(cb)

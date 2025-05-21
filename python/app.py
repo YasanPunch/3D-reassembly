@@ -25,6 +25,7 @@ class App:
         self.settings = Settings()
 
         self._scenes = []
+        self._scenes_paths = []
         self._scenes_selected = set()
 
         resource_path = gui.Application.instance.resource_path
@@ -94,14 +95,18 @@ class App:
         w.set_on_menu_item_activated(App.MENU_ABOUT, self._on_menu_about)
         # Menu ----
 
-        # self._settings_panel._apply_settings()
+        # Create processed scene widget
+        self.load(
+            "/home/pundima/dev/reassembly/data/Tombstone/Reassembled_Tombstone.obj"
+        )
 
     def _on_layout(self, layout_context):
         # The on_layout callback should set the frame (position + size) of every
         # child correctly. After the callback is done the window will layout
         # the grandchildren.
         r = self.window.content_rect
-        width = 17 * layout_context.theme.font_size
+        em = layout_context.theme.font_size
+        width = 17 * em
 
         # self._scene_widget.frame = gui.Rect(r.x, r.y, r.get_right() - width, r.height)
         # self._scene.frame = gui.Rect(r.x, r.y, r.get_right() - width, r.height)
@@ -109,15 +114,26 @@ class App:
             r.get_right() - width, r.y, width, r.height
         )
 
+        visible_count = 0
         for i, s in enumerate(self._scenes):
-            if i not in self._scenes_selected:
-                s.visible = False
+            # if i not in self._scenes_selected:
+            #     s.visible = False
+            #     continue
 
             s.visible = True
-            height = r.height / len(self._scenes_selected)
-            start_y = r.x + (i * height)
 
-            s.frame = gui.Rect(r.x, start_y, r.get_right() - width, height)
+            scene_width = (r.get_right() - width) / 2
+
+            if i == 0:
+                height = r.height
+                s.frame = gui.Rect(r.x + scene_width, r.y, scene_width, height)
+            else:
+                # height = r.height / (len(self._scenes_selected) - 1)
+                height = r.height / (len(self._scenes) - 1)
+                start_y = r.y + (visible_count * height)
+                s.frame = gui.Rect(r.x, start_y, scene_width, height)
+
+                visible_count += 1
 
         height = min(
             r.height,
@@ -244,19 +260,30 @@ class App:
     def _on_about_ok(self):
         self.window.close_dialog()
 
-    def create_scene_widget(self, mesh):
+    # You should pass either mesh or geometry
+    def create_scene_widget(self, path, mesh=None, geometry=None):
         w = self.window
         s = gui.SceneWidget()
         s.scene = rendering.Open3DScene(w.renderer)
-        s.scene.add_model("__model__", mesh)
+
+        if mesh is not None:
+            # Triangle model
+            s.scene.add_model("__model__", mesh)
+        else:
+            pass
+            # Point cloud
+            s.scene.add_geometry("__model__", geometry, self.settings.material)
+
         bounds = s.scene.bounding_box
         s.setup_camera(60, bounds, bounds.get_center())
         s.set_on_sun_direction_changed(self._settings_panel._on_sun_dir)
 
-        i = len(self._scenes) - 1
+        i = len(self._scenes)
 
         self._scenes.append(s)
         self._scenes_selected.add(i)
+        self._scenes_paths.append(path)
+
         self._models_panel.new_model()
 
         self._settings_panel._apply_settings([i])
@@ -290,13 +317,7 @@ class App:
 
         if geometry is not None or mesh is not None:
             try:
-                if mesh is not None:
-                    # Triangle model
-                    self.create_scene_widget(mesh)
-                else:
-                    pass
-                    # Point cloud
-                    # s.scene.add_geometry("__model__", geometry, self.settings.material)
+                self.create_scene_widget(path=path, mesh=mesh, geometry=geometry)
             except Exception as e:
                 print(e)
 
@@ -336,8 +357,6 @@ def main():
             "/home/pundima/dev/reassembly/data/Tombstone/Tombstone1_low.obj",
             "/home/pundima/dev/reassembly/data/Tombstone/Tombstone2_low.obj",
             "/home/pundima/dev/reassembly/data/Tombstone/Tombstone3_low.obj",
-            "/home/pundima/dev/reassembly/data/Tombstone/Tombstone4_low.obj",
-            "/home/pundima/dev/reassembly/data/Tombstone/Tombstone5_low.obj",
         ]
         for path in paths:
             if os.path.exists(path):
