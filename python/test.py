@@ -407,12 +407,108 @@ def visualize_boundaries(point_cloud, line_sets):
     o3d.visualization.draw_geometries([point_cloud] + line_sets)
 
 
+def extract_concave_convex_patches_with_labels(
+    point_cloud, K_thresh=0.005, H_thresh=0.01, neighbor_radius=5
+):
+    print("Extracting and clustering concave and convex patches...")
+
+    point_cloud.estimate_normals(
+        search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=1.0, max_nn=30)
+    )
+
+    points = np.asarray(point_cloud.points)
+    n_points = len(points)
+    kdtree = o3d.geometry.KDTreeFlann(point_cloud)
+
+    labels = np.full(n_points, fill_value=-1)  # -1 = unclassified
+
+    # 1. Curvature-based classification
+    for i in range(n_points):
+        [_, idx, _] = kdtree.search_radius_vector_3d(
+            point_cloud.points[i], neighbor_radius
+        )
+        if len(idx) < 6:
+            continue
+        neighbors = points[idx]
+        cov = np.cov(neighbors.T)
+        eigvals, _ = np.linalg.eigh(cov)
+        eigvals = np.sort(eigvals)[::-1]
+        k1, k2 = eigvals[0], eigvals[1]
+
+        K = k1 * k2
+        H = (k1 + k2) / 2
+
+        if K > K_thresh:
+            if H > H_thresh:
+                labels[i] = 1  # convex
+            elif H < -H_thresh:
+                labels[i] = 0  # concave
+
+    # 2. Patch clustering using region growing
+    def cluster_type(target_type):
+        clustered = []
+        visited = np.zeros(n_points, dtype=bool)
+
+        for i in range(n_points):
+            if labels[i] != target_type or visited[i]:
+                continue
+            cluster = []
+            queue = [i]
+            visited[i] = True
+
+            while queue:
+                current = queue.pop(0)
+                cluster.append(current)
+                [_, neighbors, _] = kdtree.search_radius_vector_3d(
+                    point_cloud.points[current], neighbor_radius
+                )
+                for ni in neighbors:
+                    if not visited[ni] and labels[ni] == target_type:
+                        visited[ni] = True
+                        queue.append(ni)
+
+            if len(cluster) >= 20:  # minimum patch size
+                clustered.append(cluster)
+
+        return clustered
+
+    concave_clusters = cluster_type(0)
+    convex_clusters = cluster_type(1)
+
+    # 3. Assign distinct colors
+    def get_distinct_colors(n, colormap_name="tab20"):
+        cmap = cm.get_cmap(colormap_name, n)
+        return [cmap(i % cmap.N)[:3] for i in range(n)]
+
+    colors = np.full((n_points, 3), fill_value=0.8)  # Gray background for unclassified
+
+    concave_colors = get_distinct_colors(len(concave_clusters), "Set1")
+    convex_colors = get_distinct_colors(len(convex_clusters), "tab20")
+
+    for i, cluster in enumerate(concave_clusters):
+        color = concave_colors[i]
+        for idx in cluster:
+            colors[idx] = color
+
+    for i, cluster in enumerate(convex_clusters):
+        color = convex_colors[i]
+        for idx in cluster:
+            colors[idx] = color
+
+    point_cloud.colors = o3d.utility.Vector3dVector(colors)
+
+    print(
+        f"Detected {len(concave_clusters)} concave patches and {len(convex_clusters)} convex patches."
+    )
+    return point_cloud
+
+
 # ----------------------------------------------------------------
 
 if __name__ == "__main__":
     print("Loading point cloud...")
     point_cloud = o3d.io.read_point_cloud(
-        "/home/pundima/dev/reassembly/data/cloudcompare/brick/complete.ply"
+        "/home/pundima/dev/reassembly/data/cloudcompare/brick/brick.ply",
     )
 
     if point_cloud.is_empty():
@@ -420,16 +516,21 @@ if __name__ == "__main__":
         exit()
 
     print("Voxel downsampling")
-    point_cloud = voxel_downsample(point_cloud, voxel_size=1.0)
+    point_cloud = voxel_downsample(point_cloud)
     o3d.visualization.draw_geometries([point_cloud])
 
     clusters = region_growing(
         point_cloud, k_neighbors=20, normal_threshold=0.90, min_cluster_size=50
     )
-    visualize_clusters(point_cloud, clusters)
+    # visualize_clusters(point_cloud, clusters)
 
     # Use point-cloud-only boundary detection
     line_sets = extract_pointcloud_boundaries(point_cloud, clusters)
     visualize_boundaries(point_cloud, line_sets)
+
+    # After region growing or voxel downsampling
+    # Extract and visualize patches
+    patch_colored_cloud = extract_concave_convex_patches_with_labels(point_cloud)
+    o3d.visualization.draw_geometries([patch_colored_cloud])
 
     print("Done!")
