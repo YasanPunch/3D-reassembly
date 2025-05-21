@@ -2,6 +2,7 @@ import open3d as o3d
 import open3d.visualization.gui as gui  # type: ignore
 import open3d.visualization.rendering as rendering
 
+from processing.fracture_surface_mesh import FractureSurfaceMesh
 from processing.segmentation import Segmentation
 from processing.boundary_curves import BoundaryCurves
 
@@ -42,7 +43,20 @@ class ProcessingPanel:
         self._panel.add_fixed(separation_height)
 
     def _on_segment(self):
-        print("5")
+        fractureSurface = FractureSurfaceMesh()
+
+        for i in self.app._scenes_selected:
+            if i == 0:
+                continue
+
+            path = self.app._scenes_paths[i]
+            res = fractureSurface.extract_fracture_surface_mesh(path)
+            o3d.visualization.draw_geometries([res])
+            mesh = o3d.visualization.rendering.TriangleMeshModel()
+            mesh.materials.append(self.app.settings.material)
+            mesh.meshes.append(res)
+            self.app._scenes[i].scene.clear_geometry()
+            self.app._scenes[i].scene.add_model("_model_processed", mesh)
 
     def _on_boundary_lines(self):
         boundaryCurves = BoundaryCurves()
