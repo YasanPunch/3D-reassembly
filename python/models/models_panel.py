@@ -39,7 +39,7 @@ class ModelsPanel:
             text = "Processed"
 
         cb = gui.Checkbox(text)
-        cb.checked = True
+        cb.checked = False
         cb.set_on_checked(handle_click)
         self.loaded_models.add_child(cb)
 

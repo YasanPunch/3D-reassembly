@@ -2,8 +2,8 @@ import numpy as np
 
 
 class Segmentation:
-    def __init__(self):
-        pass
+    def __init__(self, processing_panel):
+        self._processing_panel = processing_panel
 
     def region_growing_mesh(self, m):
         m.compute_vertex_normals(True)

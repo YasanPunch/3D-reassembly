@@ -129,26 +129,41 @@ class App:
             r.get_right() - width, r.y, width, r.height
         )
 
-        visible_count = 0
+        scene_state = "normal"
+        if 0 in self._scenes_selected and len(self._scenes_selected) == 1:
+            scene_width = r.get_right() - width
+            scene_state = "processed_only"
+        elif 0 in self._scenes_selected and len(self._scenes_selected) > 1:
+            scene_width = (r.get_right() - width) / 2
+            scene_state = "normal"
+        else:
+            scene_width = r.get_right() - width
+            scene_state = "models_only"
+
+        visible__models_count = 0
         for i, s in enumerate(self._scenes):
-            # if i not in self._scenes_selected:
-            #     s.visible = False
-            #     continue
+            if i not in self._scenes_selected:
+                s.visible = False
+                continue
 
             s.visible = True
 
-            scene_width = (r.get_right() - width) / 2
-
-            if i == 0:
+            if i == 0 and scene_state == "processed_only":
+                height = r.height
+                s.frame = gui.Rect(r.x, r.y, scene_width, height)
+            elif i == 0 and scene_state == "normal":
                 height = r.height
                 s.frame = gui.Rect(r.x + scene_width, r.y, scene_width, height)
-            else:
-                # height = r.height / (len(self._scenes_selected) - 1)
-                height = r.height / (len(self._scenes) - 1)
-                start_y = r.y + (visible_count * height)
+            elif i != 0 and scene_state == "normal":
+                height = r.height / (len(self._scenes_selected) - 1)
+                start_y = r.y + (visible__models_count * height)
                 s.frame = gui.Rect(r.x, start_y, scene_width, height)
-
-                visible_count += 1
+                visible__models_count += 1
+            elif i != 0 and scene_state == "models_only":
+                height = r.height / len(self._scenes_selected)
+                start_y = r.y + (visible__models_count * height)
+                s.frame = gui.Rect(r.x, start_y, scene_width, height)
+                visible__models_count += 1
 
         height = min(
             r.height,
@@ -324,7 +339,7 @@ class App:
         i = len(self._scenes)
 
         self._scenes.append(s)
-        self._scenes_selected.add(i)
+        # self._scenes_selected.add(i)
         self._scenes_paths.append(path)
 
         self._models_panel.new_model()

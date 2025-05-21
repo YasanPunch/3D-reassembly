@@ -2,6 +2,7 @@ import open3d as o3d
 import open3d.visualization.gui as gui  # type: ignore
 
 from processing.segmentation import Segmentation
+from processing.boundary_curves import BoundaryCurves
 
 
 class ProcessingPanel:
@@ -54,5 +55,5 @@ class ProcessingPanel:
 
     def _on_segment_mesh(self):
         m = o3d.io.read_triangle_mesh(self.app.mesh_path)
-        s = Segmentation()
+        s = Segmentation(self)
         s.region_growing_mesh(m)
