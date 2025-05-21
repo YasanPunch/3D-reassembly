@@ -412,6 +412,7 @@ def main():
                 w.window.show_message_box("Error", "Could not open file '" + path + "'")
     else:
         paths = [
+            "/home/pundima/dev/reassembly/data/cloudcompare/brick/complete.ply",
             "/home/pundima/dev/reassembly/data/Tombstone/Tombstone1_low.obj",
             "/home/pundima/dev/reassembly/data/Tombstone/Tombstone2_low.obj",
             "/home/pundima/dev/reassembly/data/Tombstone/Tombstone3_low.obj",
