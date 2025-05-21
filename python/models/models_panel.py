@@ -16,6 +16,10 @@ class ModelsPanel:
             0, gui.Margins(0.25 * em, 0.25 * em, 0.25 * em, 0.25 * em)
         )
 
+        self.label = gui.Label("Models Panel")
+        self._panel.add_child(self.label)
+        self._panel.add_fixed(separation_height)
+
         self.loaded_models = gui.CollapsableVert(
             "Loaded Models", 0.25 * em, gui.Margins(em, 0, 0, 0)
         )

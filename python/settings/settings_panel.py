@@ -40,6 +40,10 @@ class SettingsPanel:
             0, gui.Margins(0.25 * em, 0.25 * em, 0.25 * em, 0.25 * em)
         )
 
+        self.label = gui.Label("Lighting & Materials Panel")
+        self._settings_panel.add_child(self.label)
+        self._settings_panel.add_fixed(separation_height)
+
         # Create a collapsible vertical widget, which takes up enough vertical
         # space for all its children when open, but only enough for text when
         # closed. This is useful for property pages, so the user can hide sets

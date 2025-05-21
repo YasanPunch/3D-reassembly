@@ -5,6 +5,7 @@ import open3d as o3d
 import open3d.visualization.gui as gui  # type: ignore
 import open3d.visualization.rendering as rendering  # type: ignore
 
+from configuration.configuration_panel import ConfigurationPanel
 from models.models_panel import ModelsPanel
 from processing.processing_panel import ProcessingPanel
 from settings.settings import Settings
@@ -16,6 +17,8 @@ class App:
     MENU_EXPORT = 2
     MENU_QUIT = 3
     MENU_SHOW_SETTINGS = 11
+    MENU_SHOW_MODELS = 13
+    MENU_SHOW_CONFIGS = 14
     MENU_SHOW_PCPROCESSING = 12
     MENU_ABOUT = 21
 
@@ -39,6 +42,7 @@ class App:
 
         self._settings_panel = SettingsPanel(self)
         self._models_panel = ModelsPanel(self)
+        self._configuration_panel = ConfigurationPanel(self)
         self._processing_panel = ProcessingPanel(self)
 
         # Normally our user interface can be children of all one layout (usually
@@ -55,7 +59,8 @@ class App:
 
         p.add_child(self._settings_panel._settings_panel)
         p.add_child(self._models_panel._panel)
-        p.add_child(self._processing_panel._processing_panel)
+        p.add_child(self._configuration_panel._panel)
+        p.add_child(self._processing_panel._panel)
 
         # ---- Menu ----
         # The menu is global (because the macOS menu is global), so only create
@@ -69,6 +74,10 @@ class App:
             settings_menu = gui.Menu()
             settings_menu.add_item("Lighting & Materials", App.MENU_SHOW_SETTINGS)
             settings_menu.set_checked(App.MENU_SHOW_SETTINGS, True)
+            settings_menu.add_item("Models", App.MENU_SHOW_MODELS)
+            settings_menu.set_checked(App.MENU_SHOW_MODELS, True)
+            settings_menu.add_item("Configurations", App.MENU_SHOW_CONFIGS)
+            settings_menu.set_checked(App.MENU_SHOW_CONFIGS, True)
             settings_menu.add_item("Processing", App.MENU_SHOW_PCPROCESSING)
             settings_menu.set_checked(App.MENU_SHOW_PCPROCESSING, True)
             help_menu = gui.Menu()
@@ -91,6 +100,12 @@ class App:
         )
         w.set_on_menu_item_activated(
             App.MENU_SHOW_PCPROCESSING, self._on_menu_toggle_processing_panel
+        )
+        w.set_on_menu_item_activated(
+            App.MENU_SHOW_MODELS, self._on_menu_toggle_models_panel
+        )
+        w.set_on_menu_item_activated(
+            App.MENU_SHOW_CONFIGS, self._on_menu_toggle_configs_panel
         )
         w.set_on_menu_item_activated(App.MENU_ABOUT, self._on_menu_about)
         # Menu ----
@@ -147,11 +162,21 @@ class App:
 
         height = min(
             r.height,
-            self._processing_panel._processing_panel.calc_preferred_size(
+            self._configuration_panel._panel.calc_preferred_size(
                 layout_context, gui.Widget.Constraints()
             ).height,
         )
-        self._processing_panel._processing_panel.frame = gui.Rect(
+        self._configuration_panel._panel.frame = gui.Rect(
+            r.get_right() - width, r.y, width, height
+        )
+
+        height = min(
+            r.height,
+            self._processing_panel._panel.calc_preferred_size(
+                layout_context, gui.Widget.Constraints()
+            ).height,
+        )
+        self._processing_panel._panel.frame = gui.Rect(
             r.get_right() - 2 * width, r.get_bottom() - height, width, height
         )
 
@@ -211,6 +236,22 @@ class App:
     def _on_menu_quit(self):
         gui.Application.instance.quit()
 
+    def _on_menu_toggle_models_panel(self):
+        self._models_panel._panel.visible = not self._models_panel._panel.visible
+        gui.Application.instance.menubar.set_checked(
+            App.MENU_SHOW_MODELS, self._models_panel._panel.visible
+        )
+        self.window.set_needs_layout()
+
+    def _on_menu_toggle_configs_panel(self):
+        self._configuration_panel._panel.visible = (
+            not self._configuration_panel._panel.visible
+        )
+        gui.Application.instance.menubar.set_checked(
+            App.MENU_SHOW_CONFIGS, self._configuration_panel._panel.visible
+        )
+        self.window.set_needs_layout()
+
     def _on_menu_toggle_settings_panel(self):
         self._settings_panel._settings_panel.visible = (
             not self._settings_panel._settings_panel.visible
@@ -218,15 +259,17 @@ class App:
         gui.Application.instance.menubar.set_checked(
             App.MENU_SHOW_SETTINGS, self._settings_panel._settings_panel.visible
         )
+        self.window.set_needs_layout()
 
     def _on_menu_toggle_processing_panel(self):
-        self._processing_panel._processing_panel.visible = (
-            not self._processing_panel._processing_panel.visible
+        self._processing_panel._panel.visible = (
+            not self._processing_panel._panel.visible
         )
         gui.Application.instance.menubar.set_checked(
             App.MENU_SHOW_PCPROCESSING,
-            self._processing_panel._processing_panel.visible,
+            self._processing_panel._panel.visible,
         )
+        self.window.set_needs_layout()
 
     def _on_menu_about(self):
         # Show a simple dialog. Although the Dialog is actually a widget, you can
