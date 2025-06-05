@@ -111,9 +111,9 @@ class App:
         # Menu ----
 
         # Create processed scene widget
-        self.load(
-            "/home/pundima/dev/reassembly/data/Tombstone/Reassembled_Tombstone.obj"
-        )
+        #self.load(
+        #    "/home/pundima/dev/reassembly/data/Tombstone/Reassembled_Tombstone.obj"
+        #)
 
     def _on_layout(self, layout_context):
         # The on_layout callback should set the frame (position + size) of every
@@ -412,10 +412,6 @@ def main():
                 w.window.show_message_box("Error", "Could not open file '" + path + "'")
     else:
         paths = [
-            "/home/pundima/dev/reassembly/data/cloudcompare/brick/brick.ply",
-            "/home/pundima/dev/reassembly/data/Tombstone/Tombstone1_low.obj",
-            "/home/pundima/dev/reassembly/data/Tombstone/Tombstone2_low.obj",
-            "/home/pundima/dev/reassembly/data/Tombstone/Tombstone3_low.obj",
         ]
         for path in paths:
             if os.path.exists(path):

@@ -3,9 +3,8 @@ import os
 import json
 
 config_file_path = (
-    "/home/pundima/dev/reassembly/reassembly/python/configuration/configs.json"
+    "C:/Users/Yasan/Documents/GitHub/3D-Reassembly- FYP/3D-reassembly/python/configuration/configs.json"
 )
-
 
 class ConfigurationPanel:
     def __init__(self, app):

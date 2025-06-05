@@ -4,6 +4,16 @@
       "name": "Voxel_factor",
       "type": "number",
       "default": 4
+    },
+    {
+      "name": "Max_curvature_degrees",
+      "type": "number",
+      "default": 30
+    },
+    {
+      "name": "Min_region_area_percent",
+      "type": "number",
+      "default": 2
     }
   ]
 }
